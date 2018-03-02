@@ -45,7 +45,7 @@ After=snapd.service snapd.socket
 Type=oneshot
 ExecStart=/writable/system-data/var/lib/devmode-firstboot/run.sh
 RemainAfterExit=yes
-TimeoutSec=3min
+TimeoutSec=10min
 EOF
 
     mkdir -p "$system_data"/etc/systemd/system/multi-user.target.wants || true

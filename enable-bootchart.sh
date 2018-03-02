@@ -13,7 +13,7 @@ enable_bootchart()
     cat << 'EOF' > "$system_data"/etc/systemd/system/systemd-bootchart.service.d/override.conf
 [Service]
 ExecStart=
-ExecStart=/lib/systemd/systemd-bootchart -r -C --no-filter --sample 5000
+ExecStart=/lib/systemd/systemd-bootchart -r -C --no-filter --sample 16500 -o /writable/system-data/etc/
 EOF
 
     mkdir -p "$system_data"/etc/systemd/system/sysinit.target.wants/
