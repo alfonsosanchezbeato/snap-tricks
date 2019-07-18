@@ -6,10 +6,10 @@ if [ $# -lt 1 ]; then
 fi
 
 snap_name=$1
-snap_info=$(curl -s -H 'Snap-Device-Series: 16' \
-            https://api.snapcraft.io/v2/snaps/info/"$snap_name")
-echo "$snap_info" | jq -r '."channel-map"[] | .channel.name
-                                           + "\t" + .channel.architecture
-                                           + "\t" + .version
-                                           + "\t" + (.revision | tostring)
-                                           + "\t" + .channel."released-at"'
+curl -s -H 'Snap-Device-Series: 16' \
+            https://api.snapcraft.io/v2/snaps/info/"$snap_name" |
+    jq -r '."channel-map"[] | .channel.name
+                              + "\t" + .channel.architecture
+                              + "\t" + .version
+                              + "\t" + (.revision | tostring)
+                              + "\t" + .channel."released-at"'
