@@ -1,13 +1,21 @@
 #!/bin/bash -ex
 # bash needed for 'wait -n'
 
-pods=$(kubectl get pods | cut -f1 -d' ')
-mngm_pod=$(echo "$pods" | grep ^management-)
-ident_pod=$(echo "$pods" | grep ^identity-)
-mqtt_pod=$(echo "$pods" | grep ^mqtt-)
+# Return kubectl args to forward a port
+# $1: pod
+# $2: port, same is used for external and internal
+kubectl_forwarding_args()
+{
+    printf "port-forward %s --address 0.0.0.0 %s:%s" "$1" "$2" "$2"
+}
 
 microk8s.start
 microk8s.status --wait-ready
+
+pods=$(kubectl get pods | cut -f1 -d' ')
+mngm_pod=$(printf "%s\n" "$pods" | grep ^management-)
+ident_pod=$(printf "%s\n" "$pods" | grep ^identity-)
+mqtt_pod=$(printf "%s\n" "$pods" | grep ^mqtt-)
 
 ports=(8010 8030 8883)
 pods=("$mngm_pod" "$ident_pod" "$mqtt_pod")
@@ -16,7 +24,7 @@ pods=("$mngm_pod" "$ident_pod" "$mqtt_pod")
 # for 'wait' to work
 i=0
 for port in "${ports[@]}"; do
-    signature="port-forward ${pods[$i]} --address 0.0.0.0 $port:$port"
+    signature=$(kubectl_forwarding_args "${pods[$i]}" "$port")
     pkill -f -- "$signature" || true
     i=$((i + 1))
 done
@@ -25,7 +33,7 @@ while true; do
     # Create forwarders as needed
     i=0
     for port in "${ports[@]}"; do
-        signature="port-forward ${pods[$i]} --address 0.0.0.0 $port:$port"
+        signature=$(kubectl_forwarding_args "${pods[$i]}" "$port")
         if ! pgrep -f -- "$signature" &> /dev/null; then
             printf "not present for port: %s\n" "$port"
             # shellcheck disable=SC2086
