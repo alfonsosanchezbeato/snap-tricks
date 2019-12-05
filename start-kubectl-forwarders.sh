@@ -9,10 +9,10 @@ kubectl_forwarding_args()
     printf "port-forward %s --address 0.0.0.0 %s:%s" "$1" "$2" "$2"
 }
 
-microk8s.start
-microk8s.status --wait-ready
+/snap/bin/microk8s.start
+/snap/bin/microk8s.status --wait-ready
 
-pods=$(kubectl get pods | cut -f1 -d' ')
+pods=$(/snap/bin/kubectl get pods | cut -f1 -d' ')
 mngm_pod=$(printf "%s\n" "$pods" | grep ^management-)
 ident_pod=$(printf "%s\n" "$pods" | grep ^identity-)
 mqtt_pod=$(printf "%s\n" "$pods" | grep ^mqtt-)
@@ -37,7 +37,7 @@ while true; do
         if ! pgrep -f -- "$signature" &> /dev/null; then
             printf "not present for port: %s\n" "$port"
             # shellcheck disable=SC2086
-            kubectl $signature &
+            /snap/bin/kubectl $signature &
         fi
         i=$((i + 1))
     done
