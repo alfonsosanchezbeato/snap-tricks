@@ -1,4 +1,6 @@
 #!/bin/bash -e
+# Converts a systemd journal in json format to something readable.
+# Depends on jq being present on the system.
 
 if [ $# -lt 1 ]; then
     printf "Usage: %s <journal_json_file>\n" "$0"
@@ -14,11 +16,15 @@ while read -r line; do
             printf "%s\n" "$line"
             ;;
         *)
-            # Convert timestamp to a readable date
-            s=${t:0:${#t}-6}
-            date_pr=$(date -d@"$s")
-            ms=${t: -6}
-            printf "%s %sms,%s\n" "$date_pr" "$ms" "${line#*,}"
+            if [ ${#t} -gt 6 ]; then
+                # Convert timestamp in microseconds to a readable date
+                s=${t:0:${#t}-6}
+                date_pr=$(date -d@"$s")
+                us=${t: -6}
+                printf "%s %sus,%s\n" "$date_pr" "$us" "${line#*,}"
+            else
+                printf "%s\n" "$line"
+            fi
             ;;
     esac
 done
