@@ -1,4 +1,4 @@
-#!/bin/bash -exu
+#!/bin/bash -eu
 
 set -o pipefail
 
@@ -62,5 +62,6 @@ case "$(file --brief --mime-type "$image_p")" in
 esac
 
 sync
+printf "Writing to %s...\n" "$disk"
 $cat_cmd "$image_p" > "$disk"
 sync
