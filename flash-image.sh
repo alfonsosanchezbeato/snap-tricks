@@ -57,6 +57,8 @@ case "$(file --brief --mime-type "$image_p")" in
         cat_cmd="xzcat" ;;
     "application/gzip")
         cat_cmd="zcat" ;;
+    "application/zstd")
+        cat_cmd="zstdcat" ;;
     *)
         cat_cmd="cat" ;;
 esac
