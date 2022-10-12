@@ -18,8 +18,12 @@ while read -r line; do
     if [ "$(cat "$line")" != 1 ]
     then continue
     fi
-    num_usb_drives=$((num_usb_drives + 1))
+    # Check that size > 0 to avoid considering some special devices
     line=${line%/removable}
+    if [ "$(cat "$line/size")" -eq 0 ]
+    then continue
+    fi
+    num_usb_drives=$((num_usb_drives + 1))
     disk=/dev/${line##*/}
 done < <(find /sys/devices/ -path '*/block/*/removable' | grep -v virtual)
 
