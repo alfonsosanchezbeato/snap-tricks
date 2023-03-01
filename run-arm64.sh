@@ -7,6 +7,9 @@ cd out-"$arch"-qemu-22
 
 # Alternative bios:
 # -bios /usr/share/AAVMF/AAVMF_CODE.fd
+# With these options we get graphics for UEFI/grub (not for kernel):
+# -bios /usr/share/qemu-efi-aarch64/QEMU_EFI.fd
+# -device virtio-gpu-pci
 qemu-system-aarch64 -machine virt -cpu cortex-a57 -smp 2 -m 4096 \
                         -bios u-boot.bin \
                         -netdev user,id=net0,hostfwd=tcp::8022-:22 \
