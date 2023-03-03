@@ -30,4 +30,5 @@ qemu-system-aarch64 -machine virt -cpu cortex-a57 -smp 2 -m 4096 \
 	-device tpm-tis-device,tpmdev=tpm0 \
         -object rng-random,filename=/dev/urandom,id=rng0 \
         -device virtio-rng-pci,rng=rng0,id=rng-device0 \
+        -device virtio-gpu-pci \
         -serial mon:stdio -semihosting
