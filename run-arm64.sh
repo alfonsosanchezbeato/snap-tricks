@@ -15,6 +15,8 @@ qemu-system-aarch64 -machine virt -cpu cortex-a57 -smp 2 -m 4096 \
                         -device virtio-net-pci,netdev=net0 \
                         -drive if=virtio,file="$image",format=raw \
                         -device virtio-gpu-pci \
+                        -device virtio-keyboard \
+                        -device virtio-mouse \
                         -serial mon:stdio -semihosting
 exit 0
 
