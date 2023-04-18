@@ -12,5 +12,6 @@ shift
     -bios /usr/share/OVMF/OVMF_CODE.fd \
     -netdev user,id=net0,hostfwd=tcp::8022-:22,hostfwd=tcp::31111-:31111 \
     -device virtio-net-pci,netdev=net0 \
-    -drive if=virtio,file="$img",format=raw \
+    -drive "file=$img",if=none,format=raw,id=disk1 \
+    -device virtio-blk-pci,drive=disk1,bootindex=1 \
     -serial mon:stdio "$@"
