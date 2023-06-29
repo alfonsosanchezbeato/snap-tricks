@@ -11,6 +11,7 @@ if [ $# -ne 1 ]; then
 fi
 if [ ! -f OVMF_VARS.ms.fd ]; then
     printf "Please copy around UEFI vars file\n"
+    exit 1
 fi
 
 sb_bios=/usr/share/OVMF/OVMF_CODE.secboot.fd
