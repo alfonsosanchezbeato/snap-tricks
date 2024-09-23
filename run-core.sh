@@ -17,9 +17,14 @@ fi
 
 format=$(qemu-img info --output=json "$img" | jq -r .format)
 
+firmware=/usr/share/OVMF/OVMF_CODE.fd
+if [ -f /usr/share/OVMF/OVMF_CODE_4M.fd ]; then
+    firmware=/usr/share/OVMF/OVMF_CODE_4M.fd
+fi
+
 /usr/bin/qemu-system-x86_64 -enable-kvm -smp 2 -m 4096 \
-    -bios /usr/share/OVMF/OVMF_CODE.fd \
-    -netdev user,id=net0,hostfwd=tcp::8022-:22,hostfwd=tcp::31111-:31111 \
+    -drive file=$firmware,if=pflash,format="$format",unit=0,readonly=on \
+    -netdev user,id=net0,hostfwd=tcp::8022-:22,hostfwd=tcp::31111-:31111,hostname=qemu \
     -device virtio-net-pci,netdev=net0 \
     -drive file="$img",if=none,format="$format",id=disk1 \
     -device "$disk_driver",drive=disk1,bootindex=1 \

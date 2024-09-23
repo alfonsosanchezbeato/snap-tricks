@@ -12,6 +12,23 @@ fi
 if [ ! -f AAVMF_VARS.ms.fd ]; then
     printf "Please copy around UEFI vars file\n"
 fi
+if [ -f tpm2-00.permall ]; then
+    # We have TPM state
+    snap stop test-snapd-swtpm
+    cp tpm2-00.permall /var/snap/test-snapd-swtpm/current/
+    snap start test-snapd-swtpm
+else
+    # Reset TPM
+    snap stop test-snapd-swtpm
+    rm -f /var/snap/test-snapd-swtpm/current/tpm2-00.permall
+    snap start test-snapd-swtpm
+fi
+
+finish() {
+    # Backup TPM state
+    cp /var/snap/test-snapd-swtpm/current/tpm2-00.permall .
+}
+trap finish EXIT
 
 sb_bios=/usr/share/AAVMF/AAVMF_CODE.fd
 tpm_sock=/var/snap/test-snapd-swtpm/current/swtpm-sock
@@ -31,4 +48,6 @@ qemu-system-aarch64 -machine virt -cpu cortex-a57 -smp 2 -m 4096 \
         -object rng-random,filename=/dev/urandom,id=rng0 \
         -device virtio-rng-pci,rng=rng0,id=rng-device0 \
         -device virtio-gpu-pci \
-        -serial mon:stdio -semihosting
+        -device virtio-keyboard \
+        -device virtio-mouse \
+        -serial mon:stdio
