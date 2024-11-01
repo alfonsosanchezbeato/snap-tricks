@@ -12,10 +12,10 @@ fi
 img=$1
 format=$(qemu-img info --output=json "$img" | jq -r .format)
 
-nvram=OVMF_VARS.ms.fd
+nvram=OVMF_VARS_4M.ms.fd
 # snakeoil for self-signed shim
-if [ -f OVMF_VARS.snakeoil.fd ]; then
-    nvram=OVMF_VARS.snakeoil.fd
+if [ -f OVMF_VARS_4M.snakeoil.fd ]; then
+    nvram=OVMF_VARS_4M.snakeoil.fd
 fi
 if [ ! -f "$nvram" ]; then
     printf "Please copy around UEFI vars file\n"
@@ -39,7 +39,7 @@ finish() {
 }
 trap finish EXIT
 
-sb_bios=/usr/share/OVMF/OVMF_CODE.secboot.fd
+sb_bios=/usr/share/OVMF/OVMF_CODE_4M.secboot.fd
 
 /usr/bin/qemu-system-x86_64 -enable-kvm -smp 2 -m 4096 \
 	-machine q35 \
