@@ -5,11 +5,12 @@ if [ "$(id -u)" -ne 0 ]; then
     printf "Please run as root\n"
     exit 1
 fi
-if [ $# -ne 1 ]; then
+if [ $# -lt 1 ]; then
     printf "Usage: %s <image_file>\n" "$(basename "$0")"
     exit 1
 fi
 img=$1
+shift
 format=$(qemu-img info --output=json "$img" | jq -r .format)
 
 nvram=OVMF_VARS_4M.ms.fd
@@ -54,4 +55,4 @@ sb_bios=/usr/share/OVMF/OVMF_CODE_4M.secboot.fd
 	-device tpm-tis,tpmdev=tpm0 \
 	-drive "file=$img",if=none,format=raw,id=disk1 \
 	-device virtio-blk-pci,drive=disk1,bootindex=1 \
-	-serial mon:stdio
+	-serial mon:stdio "$@"
