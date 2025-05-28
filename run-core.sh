@@ -28,4 +28,5 @@ fi
     -device virtio-net-pci,netdev=net0 \
     -drive file="$img",if=none,format="$format",id=disk1 \
     -device "$disk_driver",drive=disk1,bootindex=1 \
+    -usb -device usb-ehci,id=ehci \
     -serial mon:stdio "$@"
