@@ -32,7 +32,7 @@ fi
 # See also https://jimmyg.org/blog/2024/macos-qemu/index.html
 qemu-system-x86_64 -enable-kvm \
                         -smp "$QEMU_SMP" -m "$QEMU_MEM" \
-                        -bios "$firmware" \
+                        -drive file="$firmware",if=pflash,unit=0,readonly=on \
                         -cdrom "$image" \
                         -netdev user,id=net0,hostfwd=tcp::8022-:22,hostfwd=tcp::31111-:31111,hostname=qemu \
                         -device virtio-net-pci,netdev=net0 \
