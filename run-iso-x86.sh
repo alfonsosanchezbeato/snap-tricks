@@ -31,10 +31,10 @@ fi
 # See also https://jimmyg.org/blog/2024/macos-qemu/index.html
 qemu-system-x86_64 -enable-kvm \
                         -smp "$QEMU_SMP" -m "$QEMU_MEM" \
-                        -drive file="$firmware",if=pflash,unit=0,readonly=on \
+                        -bios "$firmware" \
                         -cdrom "$image" \
                         -netdev user,id=net0,hostfwd=tcp::8022-:22,hostfwd=tcp::31111-:31111,hostname=qemu \
                         -device virtio-net-pci,netdev=net0 \
                         -drive file="$disk",if=none,format=raw,id=disk1 \
-                        -device "$disk_driver",drive=disk1,bootindex=1 \
+                        -device "$disk_driver",drive=disk1 \
                         -serial mon:stdio "$@"
