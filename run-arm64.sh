@@ -1,10 +1,11 @@
 #!/bin/sh -exu
 
-if [ $# -ne 1 ]; then
-    printf "Usage: %s <image_file>\n" "$(basename "$0")"
+if [ $# -lt 1 ]; then
+    printf "Usage: %s <image_file> <more_qemu_options>\n" "$(basename "$0")"
     exit 1
 fi
 image=$1
+shift
 
 # The DGX OS arm64 ISO ships a 64 KB-page kernel. On Apple Silicon, HVF exposes
 # the host CPU granule support and that kernel can fail in the EFI stub with
@@ -16,6 +17,7 @@ image=$1
 : "${QEMU_CPU:=max}"
 : "${QEMU_SMP:=2}"
 : "${QEMU_MEM:=4096}"
+: "${QEMU_PORT:=8022}"
 
 # Alternative bios (AAVMF on Ubuntu, homebrew on MacOS):
 # -bios /usr/share/AAVMF/AAVMF_CODE.fd
@@ -27,13 +29,13 @@ image=$1
 qemu-system-aarch64 -machine virt  -accel "$QEMU_ACCEL" -cpu "$QEMU_CPU" \
                         -smp "$QEMU_SMP" -m "$QEMU_MEM" \
                         -bios /opt/homebrew/Cellar/qemu/11.0.1/share/qemu/edk2-aarch64-code.fd \
-                        -netdev user,id=net0,hostfwd=tcp::8022-:22 \
+                        -netdev user,id=net0,hostfwd=tcp::"$QEMU_PORT"-:22 \
                         -device virtio-net-pci,netdev=net0 \
                         -drive if=virtio,file="$image",format=raw \
                         -device virtio-gpu-pci \
                         -device virtio-keyboard \
                         -device virtio-mouse \
-                        -serial stdio
+                        -serial stdio "$@"
 exit 0
 
 # It does not look like u-boot is able to load from LINUX_EFI_INITRD_MEDIA_GUID device path
