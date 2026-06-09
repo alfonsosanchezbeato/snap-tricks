@@ -38,4 +38,5 @@ qemu-system-x86_64 -enable-kvm \
                         -device virtio-net-pci,netdev=net0 \
                         -drive file="$disk",if=none,format=raw,id=disk1 \
                         -device "$disk_driver",drive=disk1 \
+                        -nographic \
                         -serial mon:stdio "$@"
