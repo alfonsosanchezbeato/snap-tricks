@@ -6,6 +6,7 @@ if [ $# -ne 2 ]; then
 fi
 image=$1
 disk=$2
+shift 2
 
 # The DGX OS arm64 ISO ships a 64 KB-page kernel. On Apple Silicon, HVF exposes
 # the host CPU granule support and that kernel can fail in the EFI stub with
