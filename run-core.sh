@@ -26,7 +26,7 @@ fi
 
 /usr/bin/qemu-system-x86_64 -enable-kvm -smp 2 -m 4096 \
     -drive file="$firmware",if=pflash,unit=0,readonly=on \
-    -netdev user,id=net0,hostfwd=tcp::"$QEMU_SSH_PORT"-:22,hostfwd=tcp::31111-:31111,hostname=qemu \
+    -netdev user,id=net0,hostfwd=tcp::"$QEMU_SSH_PORT"-:22,hostfwd=tcp::$((QEMU_SSH_PORT+100))-:31111,hostname=qemu \
     -device virtio-net-pci,netdev=net0 \
     -drive file="$img",if=none,format="$format",id=disk1 \
     -device "$disk_driver",drive=disk1,bootindex=1 \

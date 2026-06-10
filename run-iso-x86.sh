@@ -35,7 +35,7 @@ qemu-system-x86_64 -enable-kvm \
                         -smp "$QEMU_SMP" -m "$QEMU_MEM" \
                         -drive file="$firmware",if=pflash,unit=0,readonly=on \
                         -cdrom "$image" \
-                        -netdev user,id=net0,hostfwd=tcp::"$QEMU_SSH_PORT"-:22,hostfwd=tcp::31111-:31111,hostname=qemu \
+                        -netdev user,id=net0,hostfwd=tcp::"$QEMU_SSH_PORT"-:22,hostfwd=tcp::$((QEMU_SSH_PORT+100))-:31111,hostname=qemu \
                         -device virtio-net-pci,netdev=net0 \
                         -drive file="$disk",if=none,format=raw,id=disk1 \
                         -device "$disk_driver",drive=disk1 \
