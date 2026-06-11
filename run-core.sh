@@ -9,6 +9,8 @@ img=$1
 shift
 
 : "${QEMU_SSH_PORT:=8022}"
+: "${QEMU_SMP:=2}"
+: "${QEMU_MEM:=4096}"
 
 # For older UC: driver cannot be virtio-blk-pci as kernels did not include
 # that kernel module in the initramfs. Alternative: use "driver=ide-hd".
@@ -24,7 +26,8 @@ if [ -f /usr/share/OVMF/OVMF_CODE_4M.fd ]; then
     firmware=/usr/share/OVMF/OVMF_CODE_4M.fd
 fi
 
-/usr/bin/qemu-system-x86_64 -enable-kvm -smp 2 -m 4096 \
+/usr/bin/qemu-system-x86_64 -enable-kvm \
+    -smp "$QEMU_SMP" -m "$QEMU_MEM" \
     -drive file="$firmware",if=pflash,unit=0,readonly=on \
     -netdev user,id=net0,hostfwd=tcp::"$QEMU_SSH_PORT"-:22,hostfwd=tcp::$((QEMU_SSH_PORT+100))-:31111,hostname=qemu \
     -device virtio-net-pci,netdev=net0 \
