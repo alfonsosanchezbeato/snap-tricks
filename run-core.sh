@@ -21,12 +21,35 @@ fi
 
 format=$(qemu-img info --output=json "$img" | jq -r .format)
 
-firmware=/usr/share/OVMF/OVMF_CODE.fd
-if [ -f /usr/share/OVMF/OVMF_CODE_4M.fd ]; then
-    firmware=/usr/share/OVMF/OVMF_CODE_4M.fd
+# Locate the x86_64 UEFI firmware. Search the well-known Linux OVMF locations
+# first, then the data dirs QEMU itself reports via "-L help" (this covers
+# Homebrew/macOS regardless of the installed version).
+firmware=
+accel="-enable-kvm"
+fw_names=(OVMF_CODE_4M.fd OVMF_CODE.fd edk2-x86_64-code.fd)
+fw_dirs=(/usr/share/OVMF /usr/share/qemu)
+while read -r d; do
+    [ -d "$d" ] && fw_dirs+=("$d")
+done < <(qemu-system-x86_64 -L help 2>/dev/null)
+
+for d in "${fw_dirs[@]}"; do
+    for n in "${fw_names[@]}"; do
+        if [ -f "$d/$n" ]; then
+            firmware=$d/$n
+            break 2
+        fi
+    done
+done
+
+if [ -z "$firmware" ]; then
+    printf "Could not locate x86_64 UEFI firmware\n" >&2
+    exit 1
 fi
 
-/usr/bin/qemu-system-x86_64 -enable-kvm \
+# No KVM on a non-Linux host (e.g. Apple Silicon); fall back to TCG emulation.
+[ -e /dev/kvm ] || accel=
+
+qemu-system-x86_64 $accel \
     -smp "$QEMU_SMP" -m "$QEMU_MEM" \
     -drive file="$firmware",if=pflash,unit=0,readonly=on \
     -netdev user,id=net0,hostfwd=tcp::"$QEMU_SSH_PORT"-:22,hostfwd=tcp::$((QEMU_SSH_PORT+100))-:31111,hostname=qemu \
