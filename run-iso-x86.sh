@@ -25,13 +25,36 @@ rm -f "$disk"
 truncate -s "$DISK_SIZE" "$disk"
 
 disk_driver=virtio-blk-pci
-firmware=/usr/share/OVMF/OVMF_CODE.fd
-if [ -f /usr/share/OVMF/OVMF_CODE_4M.fd ]; then
-    firmware=/usr/share/OVMF/OVMF_CODE_4M.fd
+
+# Locate the x86_64 UEFI firmware. Search the well-known Linux OVMF locations
+# first, then the data dirs QEMU itself reports via "-L help" (this covers
+# Homebrew/macOS regardless of the installed version).
+firmware=
+accel="-enable-kvm"
+fw_names="OVMF_CODE_4M.fd OVMF_CODE.fd edk2-x86_64-code.fd"
+fw_dirs="/usr/share/OVMF /usr/share/qemu"
+fw_dirs="$fw_dirs $(qemu-system-x86_64 -L help 2>/dev/null)"
+
+for d in $fw_dirs; do
+    [ -d "$d" ] || continue
+    for n in $fw_names; do
+        if [ -f "$d/$n" ]; then
+            firmware=$d/$n
+            break 2
+        fi
+    done
+done
+
+if [ -z "$firmware" ]; then
+    printf "Could not locate x86_64 UEFI firmware\n" >&2
+    exit 1
 fi
 
+# No KVM on a non-Linux host (e.g. Apple Silicon); fall back to TCG emulation.
+[ -e /dev/kvm ] || accel=
+
 # See also https://jimmyg.org/blog/2024/macos-qemu/index.html
-qemu-system-x86_64 -enable-kvm \
+qemu-system-x86_64 $accel \
                         -smp "$QEMU_SMP" -m "$QEMU_MEM" \
                         -drive file="$firmware",if=pflash,unit=0,readonly=on \
                         -cdrom "$image" \
